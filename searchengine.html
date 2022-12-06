@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Bing Search List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="scripts/main.js"></script>
+    <script type="text/javascript">
+        window.onload = function () {
+            document.getElementById('file-input')
+                .addEventListener('change', readSingleFile, false);
+        }
+
+        function readSingleFile(e) {
+            var file = e.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            //console.log('File: ' + file);
+
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var contents = e.target.result;
+                displayContents(contents);
+
+                searchList = contents.split('\n');
+                // displaySearchItems(searchList);
+            };
+            reader.readAsText(file);
+        }
+
+        function displayContents(contents) {
+            var element = document.getElementById('file-content');
+            element.value = contents;
+        }
+
+        function displaySearchItems(searchitems) {
+            var selement = document.getElementById('Search-Items');
+            selement.textContent += selement.textContent.length > 0 ? '\n' + searchitems : searchitems;
+        }
+
+        function searchItem(searchToken) {
+            var encodedToken = encodeURI(searchToken);
+            var baseURL = 'https://www.bing.com/search?q=';
+            window.open(baseURL + encodedToken, "_blank");
+        }
+
+        function searchItems(numItems) {
+            // console.log('search items: ' + numItems);
+            displaySearchItems('*** Starting Search for ' + numItems + ' items...');
+
+            var i = 0;
+            var randIndxs = [];
+            var rndI = 0;
+            var pushed = false;
+            for (var j = 0; j < numItems; j++) {
+                // console.log('J : ' + j);
+                pushed = false;
+                do {
+                    rndI = genRandomIndex();
+                    if (randIndxs.indexOf(rndI) == -1) {
+                        // console.log('push ' + rndI);
+                        randIndxs.push(rndI);
+                        pushed = true;
+                    }
+                } while (randIndxs.indexOf(rndI) >= 0 && !pushed);
+            }
+
+            setInterval(
+                function () {
+                    if (i < numItems && i < randIndxs.length) {
+                        var searchTerm = searchList[randIndxs[i++]];
+                        displaySearchItems('Searching for #[' + i + ']: ' + searchTerm);
+                        // console.log('Search term: ' + searchTerm);
+                        searchItem(searchTerm);
+                    } else {
+                        clearInterval();
+                    }
+                }
+                , 2500);
+        }
+
+        function genRandomIndex() {
+            return Math.floor(Math.random() * searchList.length);
+        }
+
+        function search20Items() {
+            searchItems(4);
+        }
+
+        var searchList = []; //["muon", "quantum gravity", "the great attractor", "fractals", "fractal chaos", "strange attractors", "taylor polynomials", "cymatics", "redshift", "quantized redshift", "harold aspden", "William tifft", "Froude Number", "sacred geometry", "Grashof number", "boltzmann constant", "Vacuum Permittivity", "vacuum energy", "64 Tetrahedron matrix", "isotropic vector matrix", "Stellarator", "tokamak", "cold fusion", "low energy nuclear reaction", "Harmonic flux resonator", "Algebraic Number Theory", "Analytic Number theory", "fine structure constant", "proton electron mass ratio", "stargate vortex math", "vortex based mathematics", "Michelson–Morley experiment", "henri poincaré", "Hendrik Lorentz", "penrose tiling", "Pythagorean Tiling", "van allen belt", "vacuum permittivity", "perturbation theory quantum physics", "spallation", "quasicrystalline geometry", "sacred geometry symbols", "quantum chemistry", "planar graph", "bipartite graph", "k5 bipartite graph", "regular graph", "cubic graph", "computational complexity", "electron diffraction", "Dr. Robert James Moon", "Orbital Resonance", "keplerian atom", "Coulomb's law", "Ohm's law", "Faraday's Law of induction", "Laplace–Runge–Lenz vector", "Sympathetic Vibratory Physics ", "keely molecular morphology"];
+    </script>
+</head>
+
+<body>
+        <h2>Search List items</h2>
+        <p>Load text file with search terms in it.</p>
+    <input type="file" id="file-input" style="width:800px;" />
+    <br/>    
+    <a onclick="searchItems(30); return false;" href="#">Search 30</a>
+    <br/>
+    <a onclick="searchItems(40); return false;" href="#">Search 40</a>
+    <br/>
+
+    <div>
+        <div style="float:left; border-spacing: 5px;">
+            <h2>Contents of the file:</h2>
+            <textarea id="file-content" cols="45" rows="50"></textarea>
+        </div>
+        <div style="float:left; padding-left:5px">
+            <h2>Search List</h2>
+            <textarea id="Search-Items" cols="60" rows="50"></textarea>
+        </div>
+    </div>
+</body>
+
+</html>
